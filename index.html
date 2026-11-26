@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weeknight Table</title>
+<meta name="description" content="A demo cookbook web book: servings scaler, grocery list and cook mode.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<style>
+/* Design read: interactive recipe web book for home cooks, olive + brick on cool paper, sans display (Outfit) + Figtree. */
+:root{
+  --bg:#f2f3ee; --surface:#ffffff; --ink:#1d2116; --soft:#5a6052; --line:#dfe2d6;
+  --olive:#3d4a24; --onOlive:#f2f3ee; --accent:#b8432c; --onAccent:#ffffff; --tint:#e7eadd;
+  --r:16px; --shadow:0 10px 30px rgb(61 74 36 / .10);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14170f; --surface:#1c2016; --ink:#ebeee3; --soft:#a6ad98; --line:#2e3426;
+    --olive:#2a331a; --onOlive:#ebeee3; --accent:#e07257; --onAccent:#14170f; --tint:#232919;
+    --shadow:0 10px 30px rgb(0 0 0 / .35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14170f; --surface:#1c2016; --ink:#ebeee3; --soft:#a6ad98; --line:#2e3426;
+  --olive:#2a331a; --onOlive:#ebeee3; --accent:#e07257; --onAccent:#14170f; --tint:#232919;
+  --shadow:0 10px 30px rgb(0 0 0 / .35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Figtree,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:Outfit,system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.05}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+/* top bar */
+.bar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
+.brand{font:700 18px Outfit;letter-spacing:-.01em;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:10px}
+.mark{width:28px;height:28px;border-radius:8px;background:var(--olive);color:var(--onOlive);display:grid;place-items:center;font:800 15px Outfit}
+.demo{font:600 11px Figtree;padding:3px 8px;border-radius:999px;background:var(--tint);color:var(--soft)}
+.iconbtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:999px;font-weight:600;font-size:14px;transition:transform .15s}
+.iconbtn:active{transform:scale(.97)}
+.iconbtn i{font-size:18px}
+.count{min-width:20px;height:20px;border-radius:999px;background:var(--accent);color:var(--onAccent);font-size:12px;display:inline-grid;place-items:center;padding:0 6px}
+/* photo slot */
+.photo{position:relative;overflow:hidden;border-radius:var(--r);background:var(--tone,#888)}
+.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.photo.empty{background:linear-gradient(140deg,var(--tone,#888),color-mix(in srgb,var(--tone,#888) 55%,#000))}
+.photo.empty::after{content:"Your photo";position:absolute;left:14px;bottom:12px;font:600 12px Figtree;color:#fff;opacity:.85}
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center;padding:48px 0 56px}
+.hero h1{font-size:clamp(44px,6.4vw,76px);font-weight:800}
+.hero p{font-size:19px;color:var(--soft);max-width:36ch;margin:18px 0 28px}
+.hero .photo{aspect-ratio:4/5}
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:var(--onAccent);border:0;padding:14px 22px;border-radius:999px;font-weight:700;font-size:16px;text-decoration:none;transition:transform .15s}
+.cta:active{transform:scale(.97)}
+.by{margin-top:22px;font-size:14px;color:var(--soft)}
+/* index */
+.index{display:grid;grid-template-columns:1.4fr 1fr;grid-template-rows:auto auto;gap:16px;padding-bottom:64px}
+.card{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);transition:transform .25s cubic-bezier(.16,1,.3,1)}
+.card:hover{transform:translateY(-3px)}
+.card .photo{border-radius:0;flex:1;min-height:180px}
+.card:first-child{grid-row:span 2}
+.card:first-child .photo{min-height:340px}
+.card .txt{padding:18px 20px 20px}
+.card h3{font-size:24px;font-weight:700}
+.card p{margin:6px 0 10px;color:var(--soft);font-size:15px}
+.meta{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--tint);color:var(--ink)}
+.section-h{font-size:clamp(28px,3.4vw,40px);font-weight:700;margin:0 0 20px}
+/* recipe view */
+.recipe{display:none;padding:28px 0 80px}
+.recipe.on{display:block}
+.back{display:inline-flex;align-items:center;gap:6px;border:0;background:none;color:var(--soft);font-weight:600;padding:0;margin-bottom:18px}
+.rtop{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:end}
+.rtop .photo{aspect-ratio:5/4}
+.rtop h2{font-size:clamp(34px,4.6vw,54px);font-weight:800}
+.rtop .blurb{font-size:18px;color:var(--soft);margin:12px 0 18px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:20px;background:var(--surface)}
+.fact{padding:12px 14px}
+.fact+.fact{border-left:1px solid var(--line)}
+.fact b{display:block;font:700 20px Outfit}
+.fact span{font-size:12px;color:var(--soft)}
+.rbody{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:40px;margin-top:40px}
+.panel{background:var(--surface);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);align-self:start;position:sticky;top:80px}
+.panel h3,.method h3{font-size:22px;font-weight:700}
+.scaler{display:flex;align-items:center;justify-content:space-between;margin:14px 0 8px;padding:8px 8px 8px 14px;border-radius:999px;background:var(--tint)}
+.scaler span{font-weight:600;font-size:14px}
+.step-btns{display:flex;align-items:center;gap:6px}
+.round{width:34px;height:34px;border-radius:999px;border:0;background:var(--surface);display:grid;place-items:center;font-size:16px}
+.round:active{transform:scale(.94)}
+.sv{min-width:28px;text-align:center;font:700 18px Outfit}
+.ings{list-style:none;margin:8px 0 16px;padding:0}
+.ings li{display:flex;gap:12px;align-items:flex-start;padding:9px 0}
+.ings li+li{border-top:1px solid var(--line)}
+.ings input{appearance:none;width:20px;height:20px;border:2px solid var(--soft);border-radius:6px;margin:2px 0 0;flex:none;display:grid;place-items:center;cursor:pointer}
+.ings input:checked{background:var(--olive);border-color:var(--olive)}
+.ings input:checked::after{content:"";width:9px;height:5px;border-left:2px solid var(--onOlive);border-bottom:2px solid var(--onOlive);transform:rotate(-45deg) translate(1px,-1px)}
+.ings input:checked+label{color:var(--soft);text-decoration:line-through}
+.ings label{cursor:pointer}
+.q{font-weight:700}
+.wide{width:100%;justify-content:center}
+.method ol{list-style:none;counter-reset:s;margin:16px 0 0;padding:0}
+.method li{counter-increment:s;display:grid;grid-template-columns:44px 1fr;gap:14px;padding:16px 0;cursor:pointer;transition:opacity .2s}
+.method li+li{border-top:1px solid var(--line)}
+.method li::before{content:counter(s);width:36px;height:36px;border-radius:999px;background:var(--olive);color:var(--onOlive);display:grid;place-items:center;font:700 16px Outfit}
+.method li.done{opacity:.45}
+.method li.done::before{content:"✓"}
+.hint{font-size:13px;color:var(--soft);margin-top:6px}
+.tip{margin-top:22px;padding:16px 18px;border-radius:var(--r);background:var(--olive);color:var(--onOlive)}
+.tip b{font-family:Outfit}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+/* cook mode */
+.cook{position:fixed;inset:0;z-index:50;background:var(--olive);color:var(--onOlive);display:none;flex-direction:column;padding:20px 20px 28px}
+.cook.on{display:flex}
+.cook header{display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.cook .big{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:820px;margin:0 auto}
+.cook .n{font:700 15px Outfit;opacity:.7;margin-bottom:12px}
+.cook .t{font:600 clamp(26px,4.2vw,44px)/1.25 Outfit;letter-spacing:-.01em}
+.cook nav{display:flex;justify-content:space-between;max-width:820px;width:100%;margin:0 auto}
+.cook .iconbtn{background:transparent;border-color:color-mix(in srgb,var(--onOlive) 35%,transparent);color:var(--onOlive)}
+/* grocery drawer */
+.scrim{position:fixed;inset:0;background:rgb(0 0 0 / .35);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--surface);z-index:41;transform:translateX(100%);transition:transform .35s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column}
+body.groc .scrim{opacity:1;pointer-events:auto}
+body.groc .drawer{transform:none}
+.drawer header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}
+.drawer h3{font-size:22px}
+.glist{flex:1;overflow:auto;padding:8px 20px}
+.aisle{font:700 13px Outfit;color:var(--soft);margin:16px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+.empty-state{padding:40px 8px;color:var(--soft);text-align:center}
+.empty-state i{font-size:40px;display:block;margin-bottom:10px;color:var(--accent)}
+.drawer footer{padding:16px 20px;border-top:1px solid var(--line);display:flex;gap:10px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;opacity:0;transition:.25s;z-index:60;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+footer.site{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--soft);font-size:14px}
+footer.site .more{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:12px}
+footer.site a{color:var(--accent);font-weight:600}
+.brand,.iconbtn{white-space:nowrap}
+@media (max-width:767px){
+  #gbtn .lbl{display:none}
+  .hero{grid-template-columns:1fr;gap:24px;padding:24px 0 40px}
+  .hero .photo{aspect-ratio:4/3;order:-1}
+  .index{grid-template-columns:1fr}
+  .card:first-child{grid-row:auto}
+  .card:first-child .photo{min-height:220px}
+  .rtop,.rbody{grid-template-columns:1fr;gap:22px}
+  .panel{position:static}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media print{
+  .bar,.hero,#home,.back,.rowbtns,.scaler .step-btns,.drawer,.scrim,.cook,footer.site,.hint{display:none!important}
+  body{background:#fff;color:#000}
+  .recipe{display:none!important}.recipe.on{display:block!important;padding:0}
+  .panel{box-shadow:none;border:1px solid #ccc;position:static}
+  .rtop .photo{max-height:260px}
+}
+</style>
+</head>
+<body>
+<div class="bar"><div class="wrap">
+  <a class="brand" href="#"><span class="mark">W</span>Weeknight Table <span class="demo">Demo</span></a>
+  <button class="iconbtn" id="gbtn" aria-label="Open grocery list"><i class="ph ph-shopping-cart-simple"></i><span class="lbl">Grocery list</span><span class="count" id="gcount">0</span></button>
+</div></div>
+
+<main class="wrap">
+  <section id="home">
+    <div class="hero">
+      <div>
+        <h1 id="t"></h1>
+        <p id="s"></p>
+        <a class="cta" href="#recipes">See the recipes <i class="ph ph-arrow-down"></i></a>
+        <div class="by" id="by"></div>
+      </div>
+      <div class="photo" id="heroPhoto"></div>
+    </div>
+    <h2 class="section-h" id="recipes">Inside this sample</h2>
+    <div class="index" id="index"></div>
+  </section>
+  <section class="recipe" id="recipe"></section>
+</main>
+<footer class="site"><div class="wrap">Demo by Bill Deyegbe. Recipes written for this demo; photos from Pexels. Your book would carry your recipes, your photos and your name.<div class="more"><a href="files/weeknight-table-print.pdf">Print version (PDF)</a><a href="slides.html">Instagram launch slides</a></div></div></footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" aria-label="Grocery list">
+  <header><h3>Grocery list</h3><button class="round" id="gclose" aria-label="Close"><i class="ph ph-x"></i></button></header>
+  <div class="glist" id="glist"></div>
+  <footer><button class="iconbtn" id="gcopy"><i class="ph ph-copy"></i>Copy list</button><button class="iconbtn" id="gclear"><i class="ph ph-trash"></i>Clear</button></footer>
+</aside>
+<div class="cook" id="cook"></div>
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script>
+const B = window.BOOK, $ = s => document.querySelector(s);
+const store = {get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const FR=[[0,""],[.125,"⅛"],[.25,"¼"],[1/3,"⅓"],[.375,"⅜"],[.5,"½"],[.625,"⅝"],[2/3,"⅔"],[.75,"¾"],[.875,"⅞"],[1,""]];
+function fmt(x){ if(!x) return ""; let w=Math.floor(x+1e-9), f=x-w, best=FR[0];
+  for(const p of FR){ if(Math.abs(f-p[0])<Math.abs(f-best[0])) best=p }
+  if(best[0]===1){w+=1;best=FR[0]}
+  if(Math.abs(f-best[0])>0.04) return (Math.round(x*10)/10).toString();
+  return (w? w:"")+best[1] || "0"; }
+function unit(u,q){ if(!u) return ""; if(u==="can"&&q>1) return "cans"; if(u==="cans"&&q<=1) return "can"; if(u==="cups"&&q<=1) return "cup"; if(u==="cup"&&q>1) return "cups"; return u }
+function nm(g,q){ let s=(q>1&&g.p)?g.p:g.n; if(g.w) s+=` (about ${fmt(g.w*q/g.q)} lb)`; return s }
+function line(g,q){ return (g.q?`<span class="q">${fmt(q)}${g.u?" "+unit(g.u,q):""}</span> `:"")+nm(g,q) }
+function photo(el,r){ el.style.setProperty("--tone",r.tone); el.classList.add("photo","empty");
+  const img=new Image(); img.alt=r.title; img.onload=()=>{el.classList.remove("empty");el.appendChild(img)}; img.src=r.photo; }
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),1800)}
+
+$("#t").textContent=B.title; $("#s").textContent=B.sub; $("#by").textContent=B.by;
+photo($("#heroPhoto"),B.recipes[0]);
+$("#index").innerHTML=B.recipes.map(r=>`<a class="card" href="#r/${r.id}"><div class="photo" data-id="${r.id}"></div><div class="txt"><h3>${r.short}</h3><p>${r.blurb}</p><div class="meta">${r.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div></div></a>`).join("");
+document.querySelectorAll(".card .photo").forEach(el=>photo(el,B.recipes.find(r=>r.id===el.dataset.id)));
+
+let cur=null, serves=0;
+function render(){
+  const r=cur, k=serves/r.serves;
+  $("#recipe").innerHTML=`
+  <button class="back" onclick="location.hash=''"><i class="ph ph-arrow-left"></i>All recipes</button>
+  <div class="rtop">
+    <div><h2>${r.title}</h2><p class="blurb">${r.blurb}</p><div class="meta">${r.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+      <div class="facts"><div class="fact"><b>${r.prep} min</b><span>Prep</span></div><div class="fact"><b>${r.cook?r.cook+" min":"Overnight"}</b><span>${r.cook?"Cook":"Chill"}</span></div><div class="fact"><b>${r.oven.replace(/ \(.*\)/,"")}</b><span>${/°/.test(r.oven)?"Oven":"Method"}</span></div></div>
+    </div>
+    <div class="photo" id="rp"></div>
+  </div>
+  <div class="rbody">
+    <div class="panel">
+      <h3>Ingredients</h3>
+      <div class="scaler"><span>Serves</span><div class="step-btns"><button class="round" id="minus" aria-label="Fewer servings"><i class="ph ph-minus"></i></button><span class="sv">${serves}</span><button class="round" id="plus" aria-label="More servings"><i class="ph ph-plus"></i></button></div></div>
+      <ul class="ings">${r.ing.map((g,i)=>{const q=g.q*k;return `<li><input type="checkbox" id="i${i}"><label for="i${i}">${line(g,q)}</label></li>`}).join("")}</ul>
+      <button class="cta wide" id="addg"><i class="ph ph-shopping-cart-simple"></i>Add to grocery list</button>
+    </div>
+    <div class="method">
+      <h3>Method</h3>
+      <ol>${r.steps.map(s=>`<li><div>${s}</div></li>`).join("")}</ol>
+      <p class="hint">Tap a step to mark it done.</p>
+      <div class="tip"><b>Tip.</b> ${r.tip}</div>
+      <div class="rowbtns"><button class="iconbtn" id="cookbtn"><i class="ph ph-cooking-pot"></i>Cook mode</button><button class="iconbtn" onclick="print()"><i class="ph ph-printer"></i>Print recipe</button></div>
+    </div>
+  </div>`;
+  photo($("#rp"),r);
+  $("#minus").onclick=()=>{if(serves>1){serves--;render()}};
+  $("#plus").onclick=()=>{if(serves<12){serves++;render()}};
+  document.querySelectorAll(".method li").forEach(li=>li.onclick=()=>li.classList.toggle("done"));
+  $("#addg").onclick=()=>addGroc(r,k);
+  $("#cookbtn").onclick=()=>cook(r,0);
+}
+function route(){
+  const m=location.hash.match(/^#r\/(\w+)/);
+  if(m){cur=B.recipes.find(r=>r.id===m[1]); if(!cur) return; serves=cur.serves; $("#home").style.display="none"; $("#recipe").classList.add("on"); render(); scrollTo(0,0)}
+  else {$("#home").style.display=""; $("#recipe").classList.remove("on")}
+}
+addEventListener("hashchange",route); route();
+
+/* grocery list: merged by item name + unit, grouped by aisle */
+let G=store.get("wt-groc2",[]);
+function addGroc(r,k){ const base=s=>s?s.replace(/, (minced|diced|halved|divided|zested and juiced|drained and rinsed|any kind|to serve|to taste)$/,""):s; r.ing.forEach(g=>{ const key=base(g.n)+"|"+(g.u||""); const e=G.find(x=>x.key===key);
+  if(e){ e.q+=g.q*k } else G.push({key,n:base(g.n),p:base(g.p),w:g.w,bq:g.q,u:g.u,q:g.q*k,a:g.a,done:false}) });
+  store.set("wt-groc2",G); drawG(); toast(r.short+" added"); }
+function drawG(){ $("#gcount").textContent=G.length;
+  if(!G.length){$("#glist").innerHTML=`<div class="empty-state"><i class="ph ph-basket"></i>Your list is empty. Open a recipe and tap <b>Add to grocery list</b>.</div>`;return}
+  const aisles=["Produce","Meat","Dairy","Pantry"];
+  $("#glist").innerHTML=aisles.filter(a=>G.some(g=>g.a===a)).map(a=>`<div class="aisle">${a}</div><ul class="ings">${G.map((g,i)=>g.a!==a?"":`<li><input type="checkbox" id="g${i}" ${g.done?"checked":""} data-i="${i}"><label for="g${i}">${line({...g,q:g.bq},g.q)}</label></li>`).join("")}</ul>`).join("");
+  document.querySelectorAll("#glist input").forEach(c=>c.onchange=()=>{G[c.dataset.i].done=c.checked;store.set("wt-groc2",G)});
+}
+drawG();
+$("#gbtn").onclick=()=>document.body.classList.add("groc");
+$("#gclose").onclick=$("#scrim").onclick=()=>document.body.classList.remove("groc");
+$("#gclear").onclick=()=>{G=[];store.set("wt-groc2",G);drawG()};
+$("#gcopy").onclick=async()=>{ const txt=G.map(g=>line({...g,q:g.bq},g.q).replace(/<[^>]+>/g,"")).join("\n");
+  try{await navigator.clipboard.writeText(txt);toast("List copied")}catch(e){toast("Copy not allowed here")} };
+
+/* cook mode: one big step at a time, keeps the screen awake where supported */
+let lock=null;
+async function cook(r,i){ const c=$("#cook"); c.classList.add("on");
+  try{ if(!lock && navigator.wakeLock) lock=await navigator.wakeLock.request("screen") }catch(e){}
+  c.innerHTML=`<header><span>${r.short}</span><button class="iconbtn" id="cx"><i class="ph ph-x"></i>Exit</button></header>
+  <div class="big"><div class="n">Step ${i+1} of ${r.steps.length}</div><div class="t">${r.steps[i]}</div></div>
+  <nav><button class="iconbtn" id="cp" ${i?"":"disabled style='visibility:hidden'"}><i class="ph ph-arrow-left"></i>Back</button>
+  <button class="iconbtn" id="cn">${i<r.steps.length-1?'Next<i class="ph ph-arrow-right"></i>':'Done<i class="ph ph-check"></i>'}</button></nav>`;
+  $("#cx").onclick=endCook; $("#cp").onclick=()=>cook(r,i-1);
+  $("#cn").onclick=()=> i<r.steps.length-1? cook(r,i+1) : endCook(); }
+function endCook(){ $("#cook").classList.remove("on"); if(lock){lock.release().catch(()=>{});lock=null} }
+addEventListener("keydown",e=>{ if(e.key==="Escape"){endCook();document.body.classList.remove("groc")} });
+</script>
+</body>
+</html>
